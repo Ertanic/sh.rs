@@ -1,3 +1,7 @@
+mod logs;
+
 fn main() {
-    println!("Hello, world!");
+    let _guard = logs::init_logs();
+
+    tracing::info!("Hello, world!");
 }
