@@ -1,5 +1,4 @@
-use crate::{routes::{pages::get_pages_routes, shorts::get_shorts_routes}, templates::load_templates};
-use axum::Router;
+use crate::{routes::get_routes, templates::load_templates};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tera::Tera;
@@ -26,10 +25,7 @@ async fn main() {
     let pg_pool = db::get_pg_pool().await;
     let state = Arc::new(AppState { tera, pg_pool });
 
-    let app = Router::new()
-        .merge(get_pages_routes())
-        .merge(get_shorts_routes())
-        .with_state(state);
+    let app = get_routes(state);
 
     let listener = tokio::net::TcpListener::bind(("0.0.0.0", 3000))
         .await
