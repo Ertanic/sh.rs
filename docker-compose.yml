@@ -2,6 +2,8 @@ services:
   server:
     build: .
     restart: always
+    environment:
+      DATABASE_URL: postgres://user:password@db/sh_rs
     ports:
       - "3000:3000"
     depends_on:

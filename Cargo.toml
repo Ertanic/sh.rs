@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 axum = "0.8.4"
 serde = { version = "1.0.219", features = ["derive"] }
+small_uid = "0.2.4"
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "postgres"] }
 tera = "1.20.0"
 time = { version = "0.3.41", features = ["formatting", "local-offset"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
