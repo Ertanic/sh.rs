@@ -2,7 +2,10 @@ use std::path::PathBuf;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn init_logs() -> tracing_appender::non_blocking::WorkerGuard {
+    #[cfg(debug_assertions)]
     let env = EnvFilter::new("server=trace");
+    #[cfg(not(debug_assertions))]
+    let env = EnvFilter::new("server=info");
 
     let format = time::format_description::parse("[year]-[month]-[day] [hour]:[minute]:[second]")
         .expect("Failed to parse time format");

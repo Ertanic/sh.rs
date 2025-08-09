@@ -1,5 +1,5 @@
 [package]
-name = "sh-rs"
+name = "server"
 version = "0.1.0"
 edition = "2024"
 
@@ -12,3 +12,6 @@ tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
 tracing = "0.1.41"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter", "time"] }
+
+[build-dependencies]
+copy_to_output = "2.2.0"
