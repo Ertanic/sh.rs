@@ -19,7 +19,10 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: sh_rs
     volumes:
-      - db:/var/lib/postgresql
+      - ./db:/docker-entrypoint-initdb.d
 
-volumes:
-  db:
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
