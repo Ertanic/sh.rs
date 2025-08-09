@@ -1,2 +1,10 @@
 {% extends "base.html" %}
-{% block content %}<h1>Hello from Tera!</h1>{% endblock %}
+{% block content %}
+    <div class="center">
+        <h1 class="main_capture">Make short!</h1>
+        <form class="url_input" action="shorts" method="post">
+            <input type="url" name="long_url" placeholder="Enter URL" required>
+            <button type="submit">Shorten</button>
+        </form>
+    </div>
+{% endblock %}
