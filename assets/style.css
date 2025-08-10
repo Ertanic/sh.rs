@@ -8,7 +8,7 @@
 
 :root {
     --main-color: #333;
-    --secondary-color: #dce8f5;
+    --secondary-color: #ababab;
     --background-color: #f5e9dc;
     --text-size: 20px;
 
@@ -80,8 +80,16 @@ main {
 }
 
 .copy_box {
-    span,
-    button {
+    span {
         font-size: var(--text-size);
     }
+}
+
+.secondary {
+    color: var(--secondary-color);
+    font-size: calc(var(--text-size) - 5px);
+}
+
+.clickable {
+    cursor: pointer;
 }

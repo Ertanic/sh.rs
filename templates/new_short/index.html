@@ -8,22 +8,25 @@
     <div class="center">
         <h1 class="main_capture">Your short is ready!</h1>
         <div class="copy_box">
-            <span id="short_field">{{ short }}</span>
-            <button id="copy_button">сopy</button>
+            <span id="short_address" class="secondary clickable">loading...</span>
+            <span id="short_field" class="clickable">/{{ short }}</span>
         </div>
     </div>
     
     <script>
-        const shortField = document.getElementById("short_field");
-        const copyButton = document.getElementById("copy_button");
-        copyButton.addEventListener("click", () => navigator.clipboard.writeText(shortField.innerText));
+        const copybox = document.querySelector(".copy_box");
+        const shortAddress = document.querySelector("#short_address");
+        const shortField = document.querySelector("#short_field");
+
+        shortAddress.innerText = window.location.origin;
+        copybox.addEventListener("click", () => navigator.clipboard.writeText(shortAddress.innerText + shortField.innerText));
     </script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
-        tippy(copyButton, {
+        tippy(copybox, {
             content: "copied!",
-            trigger: 'click'
+            trigger: 'click',
         });
     </script>
 {% endblock %}
