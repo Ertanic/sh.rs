@@ -1,10 +1,15 @@
 {% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="assets/style.css">
+{% endblock %}
+
 {% block content %}
     <div class="center">
         <h1 class="main_capture">Your short is ready!</h1>
         <div class="copy_box">
             <span id="short_field">{{ short }}</span>
-            <button id="copy_button">Copy</button>
+            <button id="copy_button">сopy</button>
         </div>
     </div>
     
@@ -12,5 +17,13 @@
         const shortField = document.getElementById("short_field");
         const copyButton = document.getElementById("copy_button");
         copyButton.addEventListener("click", () => navigator.clipboard.writeText(shortField.innerText));
+    </script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+        tippy(copyButton, {
+            content: "copied!",
+            trigger: 'click'
+        });
     </script>
 {% endblock %}
