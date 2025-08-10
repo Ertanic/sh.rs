@@ -2,8 +2,13 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Default)]
 pub struct Config {
-    pub port: Option<u16>,
     pub logs: LogsConfig,
+    pub server: ServerConfig,
+}
+
+#[derive(Deserialize, Default)]
+pub struct ServerConfig {
+    pub port: Option<u16>,
     pub database: Option<String>,
     pub redis: Option<String>,
 }

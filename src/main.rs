@@ -26,8 +26,8 @@ async fn main() {
     tracing::info!("Starting server");
 
     let tera = load_templates();
-    let pg_pool = db::get_pg_pool(config.database).await;
-    let redis_pool = db::get_redis_pool(config.redis);
+    let pg_pool = db::get_pg_pool(config.server.database).await;
+    let redis_pool = db::get_redis_pool(config.server.redis);
     let state = Arc::new(AppState {
         tera,
         pg_pool,
@@ -36,7 +36,7 @@ async fn main() {
 
     let app = get_routes(state);
 
-    let listener = tokio::net::TcpListener::bind(("0.0.0.0", config.port.unwrap_or(3000)))
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", config.server.port.unwrap_or(3000)))
         .await
         .expect("Failed to bind port");
 
