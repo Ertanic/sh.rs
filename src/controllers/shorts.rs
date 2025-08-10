@@ -1,7 +1,4 @@
-use crate::{
-    AppState,
-    models::{page::Page, shorts::NewShortRequest},
-};
+use crate::{AppState, models::shorts::NewShortRequest};
 use axum::{
     Form,
     extract::{Path, State},
