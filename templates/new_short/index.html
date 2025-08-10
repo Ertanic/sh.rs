@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="center">
+        <h1 class="main_capture">Your short is ready!</h1>
+        <div class="copy_box">
+            <span id="short_field">{{ short }}</span>
+            <button id="copy_button">Copy</button>
+        </div>
+    </div>
+    
+    <script>
+        const shortField = document.getElementById("short_field");
+        const copyButton = document.getElementById("copy_button");
+        copyButton.addEventListener("click", () => navigator.clipboard.writeText(shortField.innerText));
+    </script>
+{% endblock %}
