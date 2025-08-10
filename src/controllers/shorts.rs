@@ -1,13 +1,17 @@
-use crate::{AppState, models::shorts::NewShortRequest};
+use crate::{
+    AppState,
+    models::{page::Page, shorts::NewShortRequest},
+};
 use axum::{
     Form,
     extract::{Path, State},
     http::StatusCode,
-    response::{IntoResponse, Redirect},
+    response::{Html, IntoResponse, Redirect},
 };
 use small_uid::SmallUid;
 use sqlx::Row;
 use std::sync::Arc;
+use tera::Context;
 
 pub async fn create_short(
     State(state): State<Arc<AppState>>,
@@ -27,11 +31,24 @@ pub async fn create_short(
     match result {
         Ok(_) => {
             tracing::trace!("Short URL was created");
-            (StatusCode::OK, format!("Short URL created: {uid}")).into_response()
+
+            let page_data = {
+                let mut context = Context::new();
+                context.insert("short", &uid);
+                context.insert("title", "sh.rs");
+                context
+            };
+
+            let page = state
+                .tera
+                .render("new_short/index.html", &page_data)
+                .expect("Failed to render template");
+
+            Html(page).into_response()
         }
         Err(e) => {
             tracing::error!("Failed to create short URL: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
         }
     }
 }
