@@ -1,15 +1,16 @@
-use crate::{routes::get_routes, templates::load_templates};
+use crate::{config::load_config, routes::get_routes, templates::load_templates};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tera::Tera;
 
+mod config;
 mod controllers;
 mod db;
+mod errors;
 mod logs;
 mod models;
 mod routes;
 mod templates;
-pub mod errors;
 
 struct AppState {
     tera: Tera,
@@ -19,13 +20,14 @@ struct AppState {
 
 #[tokio::main]
 async fn main() {
-    let _guard = logs::init_logs();
+    let config = load_config().await;
+    let _guard = logs::init_logs(config.logs);
 
     tracing::info!("Starting server");
 
     let tera = load_templates();
-    let pg_pool = db::get_pg_pool().await;
-    let redis_pool = db::get_redis_pool();
+    let pg_pool = db::get_pg_pool(config.database).await;
+    let redis_pool = db::get_redis_pool(config.redis);
     let state = Arc::new(AppState {
         tera,
         pg_pool,
@@ -34,7 +36,7 @@ async fn main() {
 
     let app = get_routes(state);
 
-    let listener = tokio::net::TcpListener::bind(("0.0.0.0", 3000))
+    let listener = tokio::net::TcpListener::bind(("0.0.0.0", config.port.unwrap_or(3000)))
         .await
         .expect("Failed to bind port");
 

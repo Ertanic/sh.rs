@@ -14,6 +14,7 @@ tera = "1.20.0"
 thiserror = "2.0.12"
 time = { version = "0.3.41", features = ["formatting", "local-offset"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
+toml = "0.9.5"
 tower-http = { version = "0.6.6", features = ["fs"] }
 tracing = "0.1.41"
 tracing-appender = "0.2.3"
