@@ -5,10 +5,13 @@ edition = "2024"
 
 [dependencies]
 axum = "0.8.4"
+r2d2 = "0.8.10"
+redis = { version = "0.32.5", features = ["r2d2", "tokio-comp"] }
 serde = { version = "1.0.219", features = ["derive"] }
 small_uid = "0.2.4"
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "postgres"] }
 tera = "1.20.0"
+thiserror = "2.0.12"
 time = { version = "0.3.41", features = ["formatting", "local-offset"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread"] }
 tower-http = { version = "0.6.6", features = ["fs"] }

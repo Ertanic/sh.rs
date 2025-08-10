@@ -9,10 +9,12 @@ mod logs;
 mod models;
 mod routes;
 mod templates;
+pub mod errors;
 
 struct AppState {
     tera: Tera,
     pg_pool: PgPool,
+    redis_pool: r2d2::Pool<redis::Client>,
 }
 
 #[tokio::main]
@@ -23,7 +25,12 @@ async fn main() {
 
     let tera = load_templates();
     let pg_pool = db::get_pg_pool().await;
-    let state = Arc::new(AppState { tera, pg_pool });
+    let redis_pool = db::get_redis_pool();
+    let state = Arc::new(AppState {
+        tera,
+        pg_pool,
+        redis_pool,
+    });
 
     let app = get_routes(state);
 
