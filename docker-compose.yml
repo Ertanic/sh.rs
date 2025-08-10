@@ -4,10 +4,12 @@ services:
     restart: always
     environment:
       DATABASE_URL: postgres://user:password@db/sh_rs
+      REDIS_URL: redis://redis
     ports:
       - "3000:3000"
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres
@@ -20,3 +22,9 @@ services:
       POSTGRES_DB: sh_rs
     volumes:
       - ./db:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
