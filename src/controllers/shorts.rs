@@ -1,7 +1,6 @@
 use crate::{AppState, models::shorts::NewShortRequest};
 use axum::{
-    Form,
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::{Html, IntoResponse, Redirect},
 };
@@ -12,16 +11,16 @@ use tera::Context;
 
 pub async fn create_short(
     State(state): State<Arc<AppState>>,
-    Form(form): Form<NewShortRequest>,
+    Query(params): Query<NewShortRequest>,
 ) -> impl IntoResponse {
-    tracing::trace!("Creating short URL: {}", form.long_url);
+    tracing::trace!("Creating short URL: {}", params.long_url);
 
     let uid = SmallUid::new().to_string();
     tracing::trace!("Generated UID: {}", uid);
 
     let result = sqlx::query("INSERT INTO shorts (id, long_url) VALUES ($1, $2)")
         .bind(&uid)
-        .bind(form.long_url)
+        .bind(params.long_url)
         .execute(&state.pg_pool)
         .await;
 
