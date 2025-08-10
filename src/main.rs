@@ -16,6 +16,7 @@ struct AppState {
     tera: Tera,
     pg_pool: PgPool,
     redis_pool: r2d2::Pool<redis::Client>,
+    name: String,
 }
 
 #[tokio::main]
@@ -32,6 +33,7 @@ async fn main() {
         tera,
         pg_pool,
         redis_pool,
+        name: config.server.name.unwrap_or_default(),
     });
 
     let app = get_routes(state);

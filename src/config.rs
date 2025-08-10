@@ -8,6 +8,7 @@ pub struct Config {
 
 #[derive(Deserialize, Default)]
 pub struct ServerConfig {
+    pub name: Option<String>,
     pub port: Option<u16>,
     pub database: Option<String>,
     pub redis: Option<String>,

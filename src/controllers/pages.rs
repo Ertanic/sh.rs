@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 pub async fn main_page(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut context = tera::Context::new();
-    context.insert("title", "sh.rs");
+    context.insert("title", &state.name);
 
     match state.tera.render("index.html", &context) {
         Ok(page) => Html(page).into_response(),

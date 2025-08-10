@@ -78,11 +78,15 @@ async fn get_short_from_db(state: Arc<AppState>, long_url: &str) -> Option<Strin
     }
 }
 
-fn render_result_page(tera: &Tera, uid: &str) -> axum::http::Response<axum::body::Body> {
+fn render_result_page(
+    name: &str,
+    tera: &Tera,
+    uid: &str,
+) -> axum::http::Response<axum::body::Body> {
     let page_data = {
         let mut context = Context::new();
         context.insert("short", uid);
-        context.insert("title", "sh.rs");
+        context.insert("title", name);
         context
     };
 
@@ -101,7 +105,7 @@ pub async fn create_short(
     tracing::trace!("Trying to find long URL in cache: {}", params.long_url);
     if let Some(uid) = get_short_from_db(state.clone(), &params.long_url).await {
         tracing::trace!("Found short URL in cache: {}", uid);
-        render_result_page(&state.tera, &uid).into_response()
+        render_result_page(&state.name, &state.tera, &uid).into_response()
     } else {
         tracing::trace!("Creating short URL: {}", params.long_url);
 
@@ -126,7 +130,7 @@ pub async fn create_short(
                     tracing::error!("Failed to add short URL to cache: {}", e);
                 }
 
-                render_result_page(&state.tera, &uid).into_response()
+                render_result_page(&state.name, &state.tera, &uid).into_response()
             }
             Err(e) => {
                 tracing::error!("Failed to create short URL: {}", e);
