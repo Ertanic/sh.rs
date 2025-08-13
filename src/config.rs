@@ -4,6 +4,12 @@ use serde::Deserialize;
 pub struct Config {
     pub logs: LogsConfig,
     pub server: ServerConfig,
+    pub cache: CacheConfig,
+}
+
+#[derive(Deserialize, Default)]
+pub struct CacheConfig {
+    pub lifetime: Option<i64>,
 }
 
 #[derive(Deserialize, Default)]

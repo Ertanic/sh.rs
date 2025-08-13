@@ -15,8 +15,9 @@ mod templates;
 struct AppState {
     tera: Tera,
     pg_pool: PgPool,
-    redis_pool: r2d2::Pool<redis::Client>,
+    redis_pool: mobc::Pool<mobc_redis::RedisConnectionManager>,
     name: String,
+    cache_lifetime: i64,
 }
 
 #[tokio::main]
@@ -34,6 +35,7 @@ async fn main() {
         pg_pool,
         redis_pool,
         name: config.server.name.unwrap_or_default(),
+        cache_lifetime: config.cache.lifetime.unwrap_or(3600),
     });
 
     let app = get_routes(state);
