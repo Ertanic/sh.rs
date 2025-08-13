@@ -1,7 +1,12 @@
-DROP TABLE IF EXISTS "shorts";
-CREATE TABLE "public"."shorts" (
-    "id" text NOT NULL,
-    "long_url" text NOT NULL
+CREATE TABLE shorts (
+    id SERIAL PRIMARY KEY,
+    short VARCHAR(16) UNIQUE,
+    long_url text NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX shorts_id ON public.shorts USING btree (id);
+CREATE TABLE shorts_goto_stats (
+    id SERIAL PRIMARY KEY,
+    short_id INTEGER REFERENCES shorts(id),
+    goto_at TIMESTAMPTZ DEFAULT NOW()
+);
