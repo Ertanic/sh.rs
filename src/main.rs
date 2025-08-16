@@ -37,7 +37,7 @@ async fn main() {
         tera,
         pg_pool,
         redis_pool,
-        name: config.server.name.unwrap_or_default(),
+        name: config.server.name.unwrap_or("sh.rs".to_string()),
         cache_lifetime: config.cache.lifetime.unwrap_or(3600),
     });
 
