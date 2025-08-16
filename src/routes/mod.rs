@@ -1,10 +1,12 @@
+use std::sync::Arc;
+
+use axum::Router;
+use tower_http::services::ServeDir;
+
 use crate::{
     AppState,
     routes::{pages::get_pages_routes, shorts::get_shorts_routes},
 };
-use axum::Router;
-use std::sync::Arc;
-use tower_http::services::ServeDir;
 
 pub mod pages;
 pub mod shorts;

@@ -1,11 +1,13 @@
-use crate::config::LogsConfig;
 use std::path::PathBuf;
+
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+
+use crate::config::LogsConfig;
 
 pub fn init_logs(config: LogsConfig) -> tracing_appender::non_blocking::WorkerGuard {
     #[cfg(debug_assertions)]
     let env = EnvFilter::new("server=trace");
-    
+
     #[cfg(not(debug_assertions))]
     let env = if config.debug {
         EnvFilter::new("server=trace")

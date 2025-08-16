@@ -1,10 +1,12 @@
-use crate::AppState;
+use std::sync::Arc;
+
 use axum::{
     extract::State,
     http::StatusCode,
     response::{Html, IntoResponse},
 };
-use std::sync::Arc;
+
+use crate::AppState;
 
 pub async fn main_page(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     let mut context = tera::Context::new();

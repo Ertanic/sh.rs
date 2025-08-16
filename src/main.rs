@@ -1,7 +1,9 @@
-use crate::{config::load_config, routes::get_routes, templates::load_templates};
-use sqlx::PgPool;
 use std::sync::Arc;
+
+use sqlx::PgPool;
 use tera::Tera;
+
+use crate::{config::load_config, routes::get_routes, templates::load_templates};
 
 mod config;
 mod controllers;
@@ -9,6 +11,7 @@ mod db;
 mod errors;
 mod logs;
 mod models;
+mod repos;
 mod routes;
 mod templates;
 

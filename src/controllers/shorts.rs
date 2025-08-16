@@ -1,104 +1,22 @@
-use crate::{AppState, errors::RedisConnectError, models::shorts::NewShortRequest};
+use std::sync::Arc;
+
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     response::{Html, IntoResponse, Redirect},
 };
-use mobc::Connection;
-use mobc_redis::{RedisConnectionManager, redis::AsyncCommands};
-use sha2::{Digest, Sha256};
 use small_uid::SmallUid;
-use sqlx::{PgPool, Row};
-use std::sync::Arc;
 use tera::{Context, Tera};
 use tokio::select;
 
-async fn connect_to_redis(
-    state: Arc<AppState>,
-) -> Result<Connection<RedisConnectionManager>, RedisConnectError> {
-    match state.redis_pool.get().await {
-        Ok(conn) => Ok(conn),
-        Err(e) => {
-            tracing::error!("Failed to connect to Redis: {}", e);
-            Err(RedisConnectError::ConnectionError(e))
-        }
-    }
-}
-
-async fn add_long_to_cache(
-    state: Arc<AppState>,
-    short: &str,
-    long_url: &str,
-) -> Result<(), RedisConnectError> {
-    let mut conn = connect_to_redis(state.clone()).await?;
-    conn.set::<_, _, ()>(short, long_url).await?;
-    conn.expire::<_, ()>(short, state.cache_lifetime).await?;
-    Ok(())
-}
-
-async fn get_long_from_cache(
-    state: Arc<AppState>,
-    short: &str,
-) -> Result<Option<String>, RedisConnectError> {
-    let mut conn = connect_to_redis(state).await?;
-    let long_url = conn.get(short).await?;
-    Ok(long_url)
-}
-
-fn get_long_url_key(long_url: &str) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(long_url);
-    hex::encode(hasher.finalize())
-}
-
-async fn add_short_to_cache(
-    state: Arc<AppState>,
-    long_url: &str,
-    short: &str,
-) -> Result<(), RedisConnectError> {
-    let mut conn = connect_to_redis(state.clone()).await?;
-    let key = get_long_url_key(long_url);
-    conn.set::<_, _, ()>(&key, short).await?;
-    conn.expire::<_, ()>(key, state.cache_lifetime).await?;
-    Ok(())
-}
-
-async fn get_short_from_cache(
-    state: Arc<AppState>,
-    long_url: &str,
-) -> Result<Option<String>, RedisConnectError> {
-    let mut conn = connect_to_redis(state).await?;
-    let key = get_long_url_key(long_url);
-    let short = conn.get(key).await?;
-    Ok(short)
-}
-
-async fn get_short_from_db(state: Arc<AppState>, long_url: &str) -> Option<String> {
-    let redis_result = get_short_from_cache(state.clone(), long_url);
-
-    let db_result =
-        sqlx::query_scalar::<_, String>("SELECT short FROM public.shorts WHERE long_url = $1")
-            .bind(long_url)
-            .fetch_optional(&state.pg_pool);
-
-    select! {
-        Ok(Some(short)) = redis_result => {
-            Some(short)
-        },
-        Ok(Some(short)) = db_result => {
-            let (cache_short, long_url) = (short.clone(), long_url.to_string());
-            tokio::spawn(async move {
-                if let Err(e) = add_short_to_cache(state.clone(), &long_url, &cache_short).await {
-                    tracing::error!("Failed to add short URL to cache: {}", e);
-                }
-            });
-            Some(short)
-        },
-        else => {
-            None
-        }
-    }
-}
+use crate::{
+    AppState,
+    models::shorts::NewShortRequest,
+    repos::{
+        cache::{add_short_to_cache, cache_get, cache_set},
+        db::{add_goto_stat, get_short_from_db},
+    },
+};
 
 fn render_result_page(
     name: &str,
@@ -148,7 +66,7 @@ pub async fn create_short(
             Ok(_) => {
                 tracing::trace!("Short URL was created");
 
-                if let Err(e) = add_long_to_cache(state.clone(), &uid, &params.long_url).await {
+                if let Err(e) = cache_set(state.clone(), &uid, &params.long_url).await {
                     tracing::error!("Failed to add long URL to cache: {}", e);
                 }
 
@@ -167,21 +85,6 @@ pub async fn create_short(
 }
 
 #[tracing::instrument(skip_all)]
-fn add_goto_stat(state: Arc<AppState>, short: &str) {
-    let short = short.to_string();
-    tokio::spawn(async move {
-        match sqlx::query("INSERT INTO public.shorts_goto_stats (short_id) SELECT id FROM public.shorts WHERE short = $1")
-            .bind(&short)
-            .execute(&state.pg_pool)
-        .await
-        {
-            Ok(_) => tracing::trace!("Incremented stat for UID: {}", short),
-            Err(e) => tracing::error!("Failed to increment stat: {}", e),
-        }
-    });
-}
-
-#[tracing::instrument(skip_all)]
 pub async fn goto_long_url(
     Path(short): Path<String>,
     State(state): State<Arc<AppState>>,
@@ -193,13 +96,13 @@ pub async fn goto_long_url(
             .bind(&short)
             .fetch_optional(&state.pg_pool);
 
-    let cache_result = get_long_from_cache(state.clone(), &short);
+    let cache_result = cache_get(state.clone(), &short);
 
     select! {
         Ok(Some(long_url)) = db_result => {
             tracing::trace!("Long URL from database: {}", long_url);
 
-            if let Err(e) = add_long_to_cache(state.clone(), &short, &long_url).await {
+            if let Err(e) = cache_set(state.clone(), &short, &long_url).await {
                 tracing::error!("Failed to add long URL to cache: {}", e);
             }
 

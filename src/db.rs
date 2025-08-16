@@ -1,7 +1,8 @@
+use std::env;
+
 use mobc::Pool;
 use mobc_redis::{RedisConnectionManager, redis::Client};
 use sqlx::PgPool;
-use std::env;
 
 pub async fn get_pg_pool(connection_string: Option<String>) -> PgPool {
     let connection_string = connection_string
