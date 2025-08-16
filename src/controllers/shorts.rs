@@ -99,19 +99,19 @@ pub async fn goto_long_url(
     let cache_result = cache_get(state.clone(), &short);
 
     select! {
+        Ok(Some(long_url)) = cache_result => {
+            tracing::trace!("Long URL from cache: {}", long_url);
+
+            add_goto_stat(state, &short);
+
+            Redirect::to(&long_url).into_response()
+        },
         Ok(Some(long_url)) = db_result => {
             tracing::trace!("Long URL from database: {}", long_url);
 
             if let Err(e) = cache_set(state.clone(), &short, &long_url).await {
                 tracing::error!("Failed to add long URL to cache: {}", e);
             }
-
-            add_goto_stat(state, &short);
-
-            Redirect::to(&long_url).into_response()
-        },
-        Ok(Some(long_url)) = cache_result => {
-            tracing::trace!("Long URL from cache: {}", long_url);
 
             add_goto_stat(state, &short);
 
